@@ -28,7 +28,12 @@
         <div class="row">
             <div class="stack">
                 <label class="muted">Top-K</label>
-                <input id="topk" type="number" min="1" max="10" value="5"/>
+                <div class="row-between muted" aria-hidden="true">
+                    <span>Deterministic, focused output (Top‑K = 1)</span>
+                    <span>More variability and novelty (Top‑K = 10)</span>
+                </div>
+                <input id="topk" type="range" min="1" max="10" step="1" value="5" aria-label="Top-K: controls result diversity from deterministic (1) to novel (10)"/>
+                <div class="muted" style="font-size:12px">Current Top‑K: <span id="topkVal">5</span></div>
                 <div class="btnbar">
                     <button class="primary" onclick="doAnswer()">Answer</button>
                     <button onclick="doSearch()">Search</button>
@@ -261,6 +266,17 @@
 
         // Your Textract async step will emit results in ~3–4 minutes as before
     }
+    // Sync the Top-K numeric display with the slider
+    (function initTopK() {
+        const slider = el('topk');
+        const label = document.getElementById('topkVal');
+        if (slider && label) {
+            const sync = () => { label.textContent = String(slider.value); };
+            slider.addEventListener('input', sync);
+            slider.addEventListener('change', sync);
+            sync();
+        }
+    })();
 </script>
 
 
