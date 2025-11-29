@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Intelligent Document Engine – Search & Answer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="wrap grid">
+    <div class="card stack">
+        <h1>Intelligent Document Engine — UI</h1>
+
+        <label class="muted">API Base URL</label>
+        <input id="apiBase" type="text" value="https://xewso4pokf.execute-api.eu-west-2.amazonaws.com" placeholder="https://<api-id>.execute-api.eu-west-2.amazonaws.com"/>
+
+
+        <label class="muted">Upload PDF / Image</label>
+        <input class="upload-btn" id="file" type="file" accept=".pdf,.png,.jpg,.jpeg"/>
+        <div class="btnbar">
+            <button onclick="doUpload()">Upload</button>
+        </div>
+
+
+        <label class="muted">Query</label>
+        <textarea id="query" placeholder='e.g. "requirements for coffee machine program"'></textarea>
+
+        <div class="row">
+            <div class="stack">
+                <label class="muted">Top-K</label>
+                <input id="topk" type="number" min="1" max="10" value="5"/>
+                <div class="btnbar">
+                    <button class="primary" onclick="doAnswer()">Answer</button>
+                    <button onclick="doSearch()">Search</button>
+                    <button onclick="clearOut()">Clear</button>
+                </div>
+            </div>
+            <div class="stack">
+                <label class="muted">Quick tips</label>
+                <div class="result">
+                    <div class="kvs">
+                        <div>Status</div>
+                        <div id="status" class="ok">Ready</div>
+                        <div>CORS</div>
+                        <div>If you locked CORS, serve this file from <code>http://localhost</code></div>
+                        <div>Note</div>
+                        <div>Results show S3 URIs as citations; they’re not public links (by design)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="out" class="grid"></div>
+</div>
+<!-- put these BEFORE your main script -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
+<script>
+    const el = id => document.getElementById(id);
+    const $out = el('out');
+
+    // Show JS/promise errors in the Status bar
+    window.addEventListener('error', e => setStatus(`JS error: ${e.message}`, false));
+    window.addEventListener('unhandledrejection', e => setStatus(`Promise error: ${e.reason}`, false));
+
+    function setStatus(msg, good = true) {
+        const s = el('status');
+        s.textContent = msg;
+        s.className = good ? 'ok' : 'warn';
+    }
+
+
+    function clearOut() {
+        $out.innerHTML = '';
+        setStatus('Ready', true);
+    }
+
+    function renderMD(md) {
+        if (!md) return '';
+        try {
+            if (typeof marked === 'undefined' || typeof DOMPurify === 'undefined') {
+                console.warn('Markdown libs missing; falling back to plaintext.');
+                return `<pre>${escapeHtml(md)}</pre>`;
+            }
+            const html = marked.parse(md);
+            return DOMPurify.sanitize(html);
+        } catch (err) {
+            console.error('renderMD failed:', err);
+            setStatus('Markdown render error — fell back to raw', false);
+            return `<pre>${escapeHtml(md)}</pre>`;
+        }
+    }
+
+    function renderAnswer(data) {
+        const md = data.answer_md || '';
+        const raw = data.answer_raw || data.answer || '(no answer)';
+        const isPolished = Boolean(data.answer_md);
+
+        const div = document.createElement('div');
+        div.className = 'card grid';
+        div.innerHTML = `
+      <h1>Answer</h1>
+      <div class="result">
+        ${
+            isPolished
+                ? `<div class="muted" style="margin-bottom:6px">Polished (Markdown)</div>
+               <div class="md">${renderMD(md)}</div>`
+                : `<div class="muted" style="margin-bottom:6px">Raw</div>
+               <div>${escapeHtml(raw)}</div>`
+        }
+      </div>
+
+      <div class="stack">
+        <div class="muted">Citations</div>
+        ${(data.citations || []).map(c => `
+          <div class="result">
+            <div class="kvs">
+              <div>Score</div><div>${fmt(c.score)}</div>
+              <div>Page</div><div>${c.page ?? '-'}</div>
+              <div>Chunk</div><div><code>${c.chunkId}</code></div>
+              <div>Source</div><div><code>${c.source}</code></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+        $out.prepend(div);
+    }
+
+
+    function renderSearch(data) {
+        const div = document.createElement('div');
+        div.className = 'card grid';
+        div.innerHTML = `
+    <h1>Top Matches</h1>
+    ${(data.top_k || []).map(t => `
+      <div class="result">
+        <div class="kvs">
+          <div>Score</div><div>${fmt(t.score)}</div>
+          <div>Page</div><div>${t.page ?? '-'}</div>
+          <div>Chunk</div><div><code>${t.chunkId}</code></div>
+          <div>Source</div><div><code>${t.source}</code></div>
+        </div>
+        <div class="muted" style="margin-top:8px">Preview</div>
+        <div>${escapeHtml((t.text || '').slice(0, 800))}</div>
+      </div>
+    `).join('')}
+  `;
+        $out.prepend(div);
+    }
+
+    function escapeHtml(s) {
+        return (s || '').replace(/[&<>"']/g, m => ({
+            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+        }[m]));
+    }
+
+    function fmt(n) { return (typeof n === 'number') ? n.toFixed(4) : n; }
+
+    // Fetch with network/CORS guard
+    async function doFetch(path, payload) {
+        const base = el('apiBase').value.trim();
+        if (!base) { setStatus('Please set API Base URL', false); return null; }
+        const url = base.replace(/\/+$/,'') + path;
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(payload || {})
+            });
+            const txt = await res.text();
+            let data = {};
+            try { data = JSON.parse(txt); } catch {}
+            if (!res.ok) {
+                setStatus(`HTTP ${res.status} — see console`, false);
+                console.warn('Error response body:', txt);
+                return null;
+            }
+            setStatus('OK', true);
+            return data;
+        } catch (err) {
+            setStatus('Network/CORS error — see console', false);
+            console.error('Fetch failed:', err);
+            return null;
+        }
+    }
+
+    async function doSearch() {
+        const q = el('query').value.trim();
+        const k = parseInt(el('topk').value || '5', 10);
+        if (!q) {
+            setStatus('Enter a query', false);
+            return;
+        }
+        const data = await doFetch('/search', {query: q, top_k: k});
+        if (data) renderSearch(data);
+    }
+
+    async function doAnswer() {
+        const q = el('query').value.trim();
+        const k = parseInt(el('topk').value || '5', 10);
+        if (!q) {
+            setStatus('Enter a query', false);
+            return;
+        }
+        const data = await doFetch('/answer', {query: q, top_k: k});
+        if (data) renderAnswer(data);
+    }
+
+    async function doUpload() {
+        const base = document.getElementById('apiBase').value.trim();
+        const f = document.getElementById('file').files[0];
+        if (!base) {
+            setStatus('Set API Base URL', false);
+            return;
+        }
+        if (!f) {
+            setStatus('Choose a file', false);
+            return;
+        }
+
+        // 1) Ask API for a signed URL
+        const upMeta = await fetch(base.replace(/\/+$/, '') + '/upload', {
+            method: 'POST',
+            headers: {'content-type': 'application/json'},
+            body: JSON.stringify({filename: f.name, contentType: f.type || 'application/pdf'})
+        }).then(r => r.json());
+
+        if (!upMeta.uploadUrl || !upMeta.key) {
+            setStatus('Upload URL error', false);
+            console.warn('upload/meta error', upMeta);
+            return;
+        }
+
+        // 2) PUT file directly to S3
+        const putRes = await fetch(upMeta.uploadUrl, {
+            method: 'PUT',
+            headers: {'content-type': f.type || 'application/pdf'},
+            body: f
+        });
+
+        if (!putRes.ok) {
+            setStatus('S3 PUT failed', false);
+            console.warn('S3 PUT error', await putRes.text());
+            return;
+        }
+
+        setStatus('Uploaded OK — processing...', true);
+
+        // Optional: show where it went
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+    <div class="kvs">
+      <div>Key</div><div><code>${upMeta.key}</code></div>
+      <div>S3 URI</div><div><code>${upMeta.s3Uri}</code></div>
+      <div>Type</div><div>${upMeta.contentType}</div>
+    </div>`;
+        document.getElementById('out').prepend(card);
+
+        // Your Textract async step will emit results in ~3–4 minutes as before
+    }
+</script>
+
+
+</body>
+</html>
