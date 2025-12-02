@@ -11,8 +11,11 @@
     <div class="card stack">
         <h1>Intelligent Document Engine — UI</h1>
 
-        <label class="muted">API Base URL</label>
-        <input id="apiBase" type="text" value="https://xewso4pokf.execute-api.eu-west-2.amazonaws.com" placeholder="https://<api-id>.execute-api.eu-west-2.amazonaws.com"/>
+        <!-- Wrap the API input so we can hide/show it -->
+        <div id="apiRow" class="stack" style="display:none">
+            <label class="muted" for="apiBase">API Base URL</label>
+            <input id="apiBase" type="text" placeholder="https://<api-id>.execute-api.eu-west-2.amazonaws.com"/>
+        </div>
 
 
         <label class="muted">Upload PDF / Image</label>
