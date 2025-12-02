@@ -11,12 +11,11 @@
     <div class="card stack">
         <h1>Intelligent Document Engine — UI</h1>
 
-        <!-- Wrap the API input so we can hide/show it -->
+        <!-- Hidden by default; shown only when overriding with ?api=... -->
         <div id="apiRow" class="stack" style="display:none">
             <label class="muted" for="apiBase">API Base URL</label>
             <input id="apiBase" type="text" placeholder="https://<api-id>.execute-api.eu-west-2.amazonaws.com"/>
         </div>
-
 
         <label class="muted">Upload PDF / Image</label>
         <input class="upload-btn" id="file" type="file" accept=".pdf,.png,.jpg,.jpeg"/>
@@ -24,9 +23,8 @@
             <button onclick="doUpload()">Upload</button>
         </div>
 
-
         <label class="muted">Query</label>
-        <textarea id="query" placeholder='e.g. "requirements for coffee machine program"'></textarea>
+        <textarea id="query" placeholder='e.g. "How can I thicken a thin curry sauce?"'></textarea>
 
         <div class="row">
             <div class="stack">
@@ -35,8 +33,9 @@
                     <span>Deterministic, focused output (Top‑K = 1)</span>
                     <span>More variability and novelty (Top‑K = 10)</span>
                 </div>
-                <input id="topk" type="range" min="1" max="10" step="1" value="5" aria-label="Top-K: controls result diversity from deterministic (1) to novel (10)"/>
-                <div class="muted" style="font-size:12px">Current Top‑K: <span id="topkVal">5</span></div>
+                <input id="topk" type="range" min="1" max="10" step="1" value="5"
+                       aria-label="Top-K: controls result diversity from deterministic (1) to novel (10)"/>
+                <div class="muted" style="font-size:12px">Current Top-K: <span id="topkVal">5</span></div>
                 <div class="btnbar">
                     <button class="primary" onclick="doAnswer()">Answer</button>
                     <button onclick="doSearch()">Search</button>
@@ -50,9 +49,9 @@
                         <div>Status</div>
                         <div id="status" class="ok">Ready</div>
                         <div>CORS</div>
-                        <div>If you locked CORS, serve this file from <code>http://localhost</code></div>
+                        <div>This UI calls same-origin paths (<code>/answer</code>, <code>/search</code>, <code>/upload</code>) via CloudFront.</div>
                         <div>Note</div>
-                        <div>Results show S3 URIs as citations; they’re not public links (by design)</div>
+                        <div>Results show S3 URIs as citations; they aren’t public links (by design).</div>
                     </div>
                 </div>
             </div>
@@ -61,7 +60,8 @@
 
     <div id="out" class="grid"></div>
 </div>
-<!-- put these BEFORE your main script -->
+
+<!-- Load libs BEFORE main script -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
 <script>
@@ -78,11 +78,18 @@
         s.className = good ? 'ok' : 'warn';
     }
 
-
     function clearOut() {
         $out.innerHTML = '';
         setStatus('Ready', true);
     }
+
+    function escapeHtml(s) {
+        return (s || '').replace(/[&<>"']/g, m => ({
+            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+        }[m]));
+    }
+
+    function fmt(n) { return (typeof n === 'number') ? n.toFixed(4) : n; }
 
     function renderMD(md) {
         if (!md) return '';
@@ -136,41 +143,52 @@
         $out.prepend(div);
     }
 
-
     function renderSearch(data) {
         const div = document.createElement('div');
         div.className = 'card grid';
         div.innerHTML = `
-    <h1>Top Matches</h1>
-    ${(data.top_k || []).map(t => `
-      <div class="result">
-        <div class="kvs">
-          <div>Score</div><div>${fmt(t.score)}</div>
-          <div>Page</div><div>${t.page ?? '-'}</div>
-          <div>Chunk</div><div><code>${t.chunkId}</code></div>
-          <div>Source</div><div><code>${t.source}</code></div>
+      <h1>Top Matches</h1>
+      ${(data.top_k || []).map(t => `
+        <div class="result">
+          <div class="kvs">
+            <div>Score</div><div>${fmt(t.score)}</div>
+            <div>Page</div><div>${t.page ?? '-'}</div>
+            <div>Chunk</div><div><code>${t.chunkId}</code></div>
+            <div>Source</div><div><code>${t.source}</code></div>
+          </div>
+          <div class="muted" style="margin-top:8px">Preview</div>
+          <div>${escapeHtml((t.text || '').slice(0, 800))}</div>
         </div>
-        <div class="muted" style="margin-top:8px">Preview</div>
-        <div>${escapeHtml((t.text || '').slice(0, 800))}</div>
-      </div>
-    `).join('')}
-  `;
+      `).join('')}
+    `;
         $out.prepend(div);
     }
 
-    function escapeHtml(s) {
-        return (s || '').replace(/[&<>"']/g, m => ({
-            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-        }[m]));
+    // ----- API base handling -----
+    function getApiBase() {
+        const v = el('apiBase')?.value?.trim();
+        if (v) return v.replace(/\/+$/, '');
+        // default to same-origin (CloudFront routes /answer|/search|/upload to API)
+        return location.origin;
     }
 
-    function fmt(n) { return (typeof n === 'number') ? n.toFixed(4) : n; }
+    (function bootstrapApiBase() {
+        const params = new URLSearchParams(location.search);
+        const override = params.get('api');
+        if (override) {
+            el('apiBase').value = override;
+            el('apiRow').style.display = ''; // show field when overriding
+            setStatus('Using API override from ?api=', true);
+        } else {
+            // keep hidden and use same-origin
+            el('apiRow').style.display = 'none';
+        }
+    })();
 
-    // Fetch with network/CORS guard
+    // ----- Fetch with guards -----
     async function doFetch(path, payload) {
-        const base = el('apiBase').value.trim();
-        if (!base) { setStatus('Please set API Base URL', false); return null; }
-        const url = base.replace(/\/+$/,'') + path;
+        const base = getApiBase();
+        const url  = base + path;
         try {
             const res = await fetch(url, {
                 method: 'POST',
@@ -194,13 +212,11 @@
         }
     }
 
+    // ----- Actions -----
     async function doSearch() {
         const q = el('query').value.trim();
         const k = parseInt(el('topk').value || '5', 10);
-        if (!q) {
-            setStatus('Enter a query', false);
-            return;
-        }
+        if (!q) { setStatus('Enter a query', false); return; }
         const data = await doFetch('/search', {query: q, top_k: k});
         if (data) renderSearch(data);
     }
@@ -208,35 +224,32 @@
     async function doAnswer() {
         const q = el('query').value.trim();
         const k = parseInt(el('topk').value || '5', 10);
-        if (!q) {
-            setStatus('Enter a query', false);
-            return;
-        }
+        if (!q) { setStatus('Enter a query', false); return; }
         const data = await doFetch('/answer', {query: q, top_k: k});
         if (data) renderAnswer(data);
     }
 
     async function doUpload() {
-        const base = document.getElementById('apiBase').value.trim();
+        const base = getApiBase();
         const f = document.getElementById('file').files[0];
-        if (!base) {
-            setStatus('Set API Base URL', false);
-            return;
-        }
-        if (!f) {
-            setStatus('Choose a file', false);
-            return;
-        }
+        if (!f) { setStatus('Choose a file', false); return; }
 
         // 1) Ask API for a signed URL
-        const upMeta = await fetch(base.replace(/\/+$/, '') + '/upload', {
+        const upMetaRes = await fetch(base.replace(/\/+$/, '') + '/upload', {
             method: 'POST',
             headers: {'content-type': 'application/json'},
-            body: JSON.stringify({filename: f.name, contentType: f.type || 'application/pdf'})
-        }).then(r => r.json());
+            body: JSON.stringify({ filename: f.name, contentType: f.type || 'application/pdf' })
+        }).catch(err => {
+            console.error('upload/meta fetch error', err);
+            return null;
+        });
 
+        if (!upMetaRes) { setStatus('Upload URL error (network)', false); return; }
+
+        let upMeta = {};
+        try { upMeta = await upMetaRes.json(); } catch { upMeta = {}; }
         if (!upMeta.uploadUrl || !upMeta.key) {
-            setStatus('Upload URL error', false);
+            setStatus('Upload URL error (payload)', false);
             console.warn('upload/meta error', upMeta);
             return;
         }
@@ -256,19 +269,18 @@
 
         setStatus('Uploaded OK — processing...', true);
 
-        // Optional: show where it went
+        // Show where it went
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
-    <div class="kvs">
-      <div>Key</div><div><code>${upMeta.key}</code></div>
-      <div>S3 URI</div><div><code>${upMeta.s3Uri}</code></div>
-      <div>Type</div><div>${upMeta.contentType}</div>
-    </div>`;
+      <div class="kvs">
+        <div>Key</div><div><code>${upMeta.key}</code></div>
+        <div>S3 URI</div><div><code>${upMeta.s3Uri}</code></div>
+        <div>Type</div><div>${upMeta.contentType}</div>
+      </div>`;
         document.getElementById('out').prepend(card);
-
-        // Your Textract async step will emit results in ~3–4 minutes as before
     }
+
     // Sync the Top-K numeric display with the slider
     (function initTopK() {
         const slider = el('topk');
@@ -281,7 +293,5 @@
         }
     })();
 </script>
-
-
 </body>
 </html>
