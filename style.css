@@ -37,8 +37,9 @@ h1 {
 
 .row {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 12px;
+    /* Set columns to ~30% (Top-K + buttons) and ~70% (Quick tips) */
+    grid-template-columns: 3fr 7fr;
+    gap: 30px;
     align-items: start;
 }
 
