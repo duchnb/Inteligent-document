@@ -114,7 +114,7 @@ textarea {
 
 .btnbar {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
@@ -141,6 +141,7 @@ button.primary {
     color: var(--muted);
     font-size: 12px;
 }
+#topkVal { font-weight:bold; }
 
 .grid {
     display: grid;
@@ -156,7 +157,7 @@ button.primary {
 
 .kvs {
     display: grid;
-    grid-template-columns: 120px 1fr;
+    grid-template-columns: 60px 1fr;
     gap: 6px 10px;
     font-size: 13px;
 }
