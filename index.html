@@ -17,15 +17,13 @@
             <input id="apiBase" type="text" placeholder="https://<api-id>.execute-api.eu-west-2.amazonaws.com"/>
         </div>
 
-        <label class="muted">Upload PDF / Image</label>
+        <label class="muted">Upload PDF</label>
         <input class="upload-btn" id="file" type="file" accept=".pdf,.png,.jpg,.jpeg"/>
         <div class="btnbar">
             <button onclick="doUpload()">Upload</button>
         </div>
-        <br/>
         <label class="muted">Query</label>
         <textarea id="query" placeholder='e.g. "How can I thicken a thin curry sauce?"'></textarea>
-        <br/>
         <div class="row">
             <div class="stack">
                 <label class="muted">Top-K</label>
@@ -36,7 +34,6 @@
                 <input id="topk" type="range" min="1" max="10" step="1" value="5"
                        aria-label="Top-K: controls result diversity from deterministic (1) to novel (10)"/>
                 <div class="muted" style="font-size:12px">Current Top-K: <span id="topkVal">5</span></div>
-                <br/>
                 <div class="btnbar">
                     <button class="primary" onclick="doAnswer()">Answer</button>
                     <button onclick="doSearch()">Search</button>

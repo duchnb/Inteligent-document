@@ -208,3 +208,12 @@ a:hover {
 @media (max-width: 900px) {
     .row { grid-template-columns: 1fr; }
 }
+
+/* Space between Upload button bar and the following Query label */
+.card .btnbar + label.muted { display: block; margin-top: 16px; }
+
+/* Space between Query textarea and the Top-K/Quick tips row */
+textarea + .row { margin-top: 16px; }
+
+/* Extra space between the Top-K value line and the action buttons */
+.row .stack > .muted + .btnbar { margin-top: 12px; }
