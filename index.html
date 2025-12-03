@@ -61,10 +61,12 @@
     <div id="out" class="grid"></div>
 </div>
 
-<!-- Busy overlay (CSS already in style.css) -->
-<div id="busy" class="busy" aria-live="polite" aria-atomic="true" style="display:none">
+<!-- Busy overlay -->
+<div id="busy-layer" aria-hidden="true">
+  <div class="busy-panel" role="status" aria-live="polite">
     <div class="spinner" aria-hidden="true"></div>
-    <div id="busyText">Processing…</div>
+    <div class="label">Working…</div>
+  </div>
 </div>
 
 <!-- Load libs BEFORE main script -->
