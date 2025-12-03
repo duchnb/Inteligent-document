@@ -1,12 +1,12 @@
 # Lambda Trigger
 # SQS: ide-textract-events
-# arn:aws:sqs:eu-west-2:519845866060:ide-textract-events
+# arn:aws:sqs:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:ide-textract-events
 # state: Enabled
 # Details
 # Activate trigger: Yes
 # Batch size: 1
 # Batch window: None
-# Event source mapping ARN: arn:aws:lambda:eu-west-2:519845866060:event-source-mapping:c484334e-8c5d-4f80-808c-7d23b76bcbf6
+# Event source mapping ARN: arn:aws:lambda:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:event-source-mapping:<YOUR_MAPPING_ID>
 # Metrics: None
 # On-failure destination: None
 # Report batch item failures: No

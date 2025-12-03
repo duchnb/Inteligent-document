@@ -1,7 +1,7 @@
 # Lambda Trigger
 # API Gateway: ide_API
-# arn:aws:execute-api:eu-west-2:519845866060:xewso4pokf/*/*/delete
-# API endpoint: https://xewso4pokf.execute-api.eu-west-2.amazonaws.com/delete
+# arn:aws:execute-api:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:<YOUR_API_ID>/*/*/delete
+# API endpoint: https://<YOUR_API_ID>.execute-api.<YOUR_REGION>.amazonaws.com/delete
 # Details
 # API type: HTTP
 # Authorization: NONE

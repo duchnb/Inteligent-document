@@ -1,7 +1,7 @@
 # Lambda Trigger
 # API Gateway: ide_API
-# arn:aws:execute-api:eu-west-2:519845866060:xewso4pokf/*/*/ingest
-# API endpoint: https://xewso4pokf.execute-api.eu-west-2.amazonaws.com/ingest
+# arn:aws:execute-api:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:<YOUR_API_ID>/*/*/ingest
+# API endpoint: https://<YOUR_API_ID>.execute-api.<YOUR_REGION>.amazonaws.com/ingest
 # Details
 # API type: HTTP
 # Authorization: NONE
@@ -34,7 +34,7 @@ MODEL_ID   = os.environ.get("BEDROCK_MODEL_ID","amazon.titan-embed-text-v2:0")
 MAX_CHARS  = int(os.environ.get("MAX_CHARS_PER_CHUNK","800"))
 
 table  = ddb.Table(TABLE_NAME)
-BUCKET = "ide-bd-eu-west-2"  # change if your bucket name differs
+BUCKET = "<YOUR_BUCKET_NAME>"  # change to your bucket name
 
 def embed_text(text: str):
     body = json.dumps({"inputText": text})

@@ -1,7 +1,7 @@
 # Lambda Trigger
 # API Gateway: ide_API
-# arn:aws:execute-api:eu-west-2:519845866060:xewso4pokf/*/*/search
-# API endpoint: https://xewso4pokf.execute-api.eu-west-2.amazonaws.com/search
+# arn:aws:execute-api:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:<YOUR_API_ID>/*/*/search
+# API endpoint: https://<YOUR_API_ID>.execute-api.<YOUR_REGION>.amazonaws.com/search
 # Details
 # API type: HTTP
 # Authorization: NONE
@@ -17,7 +17,7 @@
 # Environment variables
 # BEDROCK_MODEL_ID: amazon.titan-embed-text-v2:0
 # BEDROCK_REGION: eu-west-2
-# OS_ENDPOINT: https://hq3ab9ffd7dm49qxi7mb.eu-west-2.aoss.amazonaws.com
+# OS_ENDPOINT: https://<YOUR_OPENSEARCH_ENDPOINT>.aoss.amazonaws.com
 # OS_INDEX: ide-rag
 # OS_NUM_CANDIDATES: 100
 # OS_SIGV4_SERVICE: aoss

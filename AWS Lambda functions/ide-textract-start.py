@@ -1,23 +1,23 @@
 
 
 # Lambda Triggers
-# S3: ide-bd-eu-west-2
-# arn:aws:s3:::ide-bd-eu-west-2
+# S3: <YOUR_BUCKET_NAME>
+# arn:aws:s3:::<YOUR_BUCKET_NAME>
 # Details
-# Bucket arn: arn:aws:s3:::ide-bd-eu-west-2
+# Bucket arn: arn:aws:s3:::<YOUR_BUCKET_NAME>
 # Event types: s3:ObjectCreated:*
 # isComplexStatement: No
 # Notification name: 6f3e069f-3208-4b4c-bdbb-e70ea297be98
 # Prefix: uploads/
 # Service principal: s3.amazonaws.com
-# Source account: 519845866060
+# Source account: <YOUR_ACCOUNT_ID>
 # Statement ID: lambda-13d31248-4445-4738-9d29-21d154a89d18
 #                     Suffix: .pdf
 
 # Environment variables
 # ALLOWED_SUFFIXES: PDF, JPEG, PNG, TIFF
-# SNS_TOPIC_ARN: arn:aws:sns:eu-west-2:519845866060:AmazonTextract-ide-events
-# TEXTRACT_ROLE_ARN: arn:aws:iam::519845866060:role/TextractServiceRole-ide
+# SNS_TOPIC_ARN: arn:aws:sns:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:AmazonTextract-ide-events
+# TEXTRACT_ROLE_ARN: arn:aws:iam::<YOUR_ACCOUNT_ID>:role/TextractServiceRole-ide
 
 import json
 import boto3

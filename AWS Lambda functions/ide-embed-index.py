@@ -1,14 +1,14 @@
 #Lambda Trigger
-# S3: ide-bd-eu-west-2
-# arn:aws:s3:::ide-bd-eu-west-2
+# S3: <YOUR_BUCKET_NAME>
+# arn:aws:s3:::<YOUR_BUCKET_NAME>
 # Details
-# Bucket arn: arn:aws:s3:::ide-bd-eu-west-2
+# Bucket arn: arn:aws:s3:::<YOUR_BUCKET_NAME>
 # Event types: s3:ObjectCreated:*
 # isComplexStatement: No
 # Notification name: 5a39385a-29b8-4eaa-9479-6f0d2422fd1e
 # Prefix: extracted/
 # Service principal: s3.amazonaws.com
-# Source account: 519845866060
+# Source account: <YOUR_ACCOUNT_ID>
 # Statement ID: lambda-e45558ec-e2bb-4acc-8ab5-fba6f67284c8
 #                     Suffix: .json
 
@@ -16,7 +16,7 @@
 # BEDROCK_MODEL_ID: amazon.titan-embed-text-v2:0
 # BEDROCK_REGION: eu-west-2
 # MAX_CHARS_PER_CHUNK: 800
-# OS_ENDPOINT: https://hq3ab9ffd7dm49qxi7mb.eu-west-2.aoss.amazonaws.com
+# OS_ENDPOINT: https://<YOUR_OPENSEARCH_ENDPOINT>.aoss.amazonaws.com
 # OS_INDEX: ide-rag
 # OS_NUM_CANDIDATES: 100
 # OS_SIGV4_SERVICE: aoss

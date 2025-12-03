@@ -1,7 +1,7 @@
 # Lambda trigger
 # API Gateway: ide_API
-# arn:aws:execute-api:eu-west-2:519845866060:xewso4pokf/*/*/answer
-# API endpoint: https://xewso4pokf.execute-api.eu-west-2.amazonaws.com/answer
+# arn:aws:execute-api:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:<YOUR_API_ID>/*/*/answer
+# API endpoint: https://<YOUR_API_ID>.execute-api.<YOUR_REGION>.amazonaws.com/answer
 # Details
 # API type: HTTP
 # Authorization: NONE
@@ -21,7 +21,7 @@
 # MAX_ANSWER_CHARS: 800
 # MAX_SNIPPETS: 2
 # MIN_SCORE: 0.35
-# OS_ENDPOINT: https://hq3ab9ffd7dm49qxi7mb.eu-west-2.aoss.amazonaws.com
+# OS_ENDPOINT: https://<YOUR_OPENSEARCH_ENDPOINT>.aoss.amazonaws.com
 # OS_INDEX: ide-rag
 # OS_NUM_CANDIDATES: 100
 # OS_SIGV4_SERVICE: aoss
