@@ -9,13 +9,13 @@
 
 import os, json, re, time, uuid, base64, boto3
 
-
-
 s3 = boto3.client("s3")
 BUCKET = os.environ["BUCKET"]
 PREFIX = os.environ.get("DEFAULT_PREFIX", "uploads/")
 EXPIRES = int(os.environ.get("EXPIRES_IN", "900"))
 ALLOWED = set((os.environ.get("ALLOWED_TYPES") or "application/pdf,image/png,image/jpeg").split(","))
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+
 
 def _res(status, body):
     return {
@@ -38,6 +38,11 @@ def _safe_name(name: str) -> str:
 
 def lambda_handler(event, context):
     data = _parse(event)
+    file_size = data.get('fileSize', 0)
+    if file_size > MAX_FILE_SIZE:
+        return _res(400, {
+            "error": f"File too large. Max size: {MAX_FILE_SIZE / 1024 / 1024}MB"
+        })
     filename = _safe_name(data.get("filename") or "file.pdf")
     ctype = (data.get("contentType") or "application/pdf").strip().lower()
 
