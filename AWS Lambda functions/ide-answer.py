@@ -488,3 +488,4 @@ def lambda_handler(event, context):
         return {"error": "Provide {\"query\":\"...\"} in the event."}
     api_evt = {"requestContext":{"http":{}}, "body": json.dumps({"query": query, "top_k": event.get("top_k", TOP_K)})}
     return lambda_handler(api_evt, context)
+
