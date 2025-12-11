@@ -5,6 +5,38 @@ const $out = el('out');
 window.addEventListener('error', e => setStatus(`JS error: ${e.message}`, false));
 window.addEventListener('unhandledrejection', e => setStatus(`Promise error: ${e.reason}`, false));
 
+// Geolocation check (client-side deterrent - easily bypassed with VPN)
+let GEO_ALLOWED = true;
+const ALLOWED_COUNTRIES = ['GB', 'IE']; // UK and Ireland
+
+async function checkGeolocation() {
+    const urlParams = new URLSearchParams(window.location.search);
+    // Skip geo check if has CV access token
+    if (urlParams.get('access')) {
+        GEO_ALLOWED = true;
+        return;
+    }
+    
+    try {
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        const country = data.country_code;
+        
+        if (!ALLOWED_COUNTRIES.includes(country)) {
+            GEO_ALLOWED = false;
+            setStatus('Service temporarily unavailable in your region', false);
+            // Disable all buttons
+            document.querySelectorAll('button').forEach(b => b.disabled = true);
+        }
+    } catch (err) {
+        console.warn('Geolocation check failed, allowing access:', err);
+        GEO_ALLOWED = true; // Fail open
+    }
+}
+
+// Run geo check on page load
+checkGeolocation();
+
 function setStatus(msg, good = true) {
     const s = el('status');
     s.textContent = msg;
@@ -177,6 +209,10 @@ async function doFetch(path, payload) {
 
 // ----- Actions (with busy overlay & double-click guard) -----
 async function doSearch() {
+    if (!GEO_ALLOWED) {
+        setStatus('Service temporarily unavailable', false);
+        return;
+    }
     if (BUSY) {
         setStatus('Please wait — still processing…', false);
         return;
@@ -203,6 +239,10 @@ async function doSearch() {
 }
 
 async function doAnswer() {
+    if (!GEO_ALLOWED) {
+        setStatus('Service temporarily unavailable', false);
+        return;
+    }
     if (BUSY) {
         setStatus('Please wait — still processing…', false);
         return;
@@ -229,7 +269,10 @@ async function doAnswer() {
 }
 
 async function doUpload() {
-
+    if (!GEO_ALLOWED) {
+        setStatus('Service temporarily unavailable', false);
+        return;
+    }
     if (BUSY) {
         setStatus('Please wait — still processing…', false);
         return;

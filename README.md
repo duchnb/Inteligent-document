@@ -21,7 +21,7 @@ A production-ready, serverless RAG (Retrieval-Augmented Generation) pipeline on 
 <p align="center">
   <img src="docs/screenshots/diagrams/ide-architecture.png" width="32%" />
   <img src="docs/screenshots/DynamoDB/DynamoDB_ide-rag_items.png" width="32%" />
-  <img src="docs/screenshots/logs/Log_ide-answer_same as query_plus_LLM_amazon.titan-text-express-v1.png" width="32%" />
+  <img src="docs/screenshots/logs/Log_ide-answer_same_as_query_plus_LLM_amazon.titan-text-express-v1.png" width="32%" />
 </p>
 
 <p align="center">
@@ -187,7 +187,7 @@ Document processing initiation:
 ---
 
 ### CloudWatch Logs - Textract Callback
-![Textract Callback](docs/screenshots/logs/Log_ide-textract-callback_Job_SUCCEEDED_pages fetched_chunks_sent_to_embed_index..png)
+![Textract Callback](docs/screenshots/logs/Log_ide-textract-callback_Job_SUCCEEDED_pages_fetched_chunks_sent_to_embed_index..png)
 
 Text extraction completion:
 - Job status: SUCCEEDED
@@ -217,7 +217,7 @@ Semantic search execution:
 ---
 
 ### CloudWatch Logs - Answer Generation
-![Answer Log](docs/screenshots/logs/Log_ide-answer_same as query_plus_LLM_amazon.titan-text-express-v1.png)
+![Answer Log](docs/screenshots/logs/Log_ide-answer_same_as_query_plus_LLM_amazon.titan-text-express-v1.png)
 
 RAG pipeline execution:
 - Semantic retrieval
