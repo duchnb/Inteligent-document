@@ -153,7 +153,7 @@ Semantic search results with:
 ---
 
 ### Answer with Citations
-![Answer View](docs/screenshots/UI/Answer_view _Polished_Markdown_and_Citations_list.png)
+![Answer View](docs/screenshots/UI/Answer_view_Polished_Markdown_and_Citations_list.png)
 
 RAG-powered answers featuring:
 - **Polished Markdown** with summary and bullets
@@ -167,7 +167,7 @@ RAG-powered answers featuring:
 ## 🔍 Backend & Monitoring
 
 ### CloudWatch Logs - Upload Flow
-![Upload Log](docs/screenshots/logs/Log_ide-upload-url – success.png)
+![Upload Log](docs/screenshots/logs/Log_ide-upload-url–success.png)
 
 Presigned URL generation:
 - Request validation
@@ -207,7 +207,7 @@ Vector generation and storage:
 ---
 
 ### CloudWatch Logs - Query Processing
-![Query Log](docs/screenshots/logs/Log_ide-query – query_embedded_similarity_scored_return_Top-K..png)
+![Query Log](docs/screenshots/logs/Log_ide-query–query_embedded_similarity_scored_return_Top-K..png)
 
 Semantic search execution:
 - Query embedding
@@ -323,7 +323,7 @@ Lambda integrations:
 ---
 
 ### API Gateway Authorizer
-![API Authorizer](docs/screenshots/API_Gateway/API_Gateway_Authorizer .png)
+![API Authorizer](docs/screenshots/API_Gateway/API_Gateway_Authorizer.png)
 
 Security layer:
 - Lambda authorizer
