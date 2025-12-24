@@ -15,7 +15,7 @@ A production-ready, serverless RAG (Retrieval-Augmented Generation) pipeline on 
 <p align="center">
   <img src="docs/screenshots/UI/User_landing_page_index.png" width="32%" />
   <img src="docs/screenshots/UI/Upload_success_card_shows_Key_and_S3_URI.png" width="32%" />
-  <img src="docs/screenshots/UI/Answer_view _Polished_Markdown_and_Citations_list.png" width="32%" />
+  <img src="docs/screenshots/UI/Answer_view_Polished_Markdown_and_Citations_list.png" width="32%" />
 </p>
 
 <p align="center">
